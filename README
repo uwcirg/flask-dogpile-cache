@@ -1,3 +1,78 @@
-Flask Dogpile.Cache
+Flask-Dogpile-Cache
+-------------------
 
-Add Dogpile.Cache support to Flask. Under development.
+Easy to Configure
+`````````````````
+
+.. code:: python
+
+    # config.py
+
+    DOGPILE_CACHE_URLS = ("127.0.0.1:11211",)
+    DOGPILE_CACHE_REGIONS = (
+        ('hour', 3600),
+        ('day', 3600 * 24),
+        ('month', 3600 * 24 * 31),
+    )
+
+    # Default settings:
+    # DOGPILE_CACHE_BACKEND = 'dogpile.cache.memcached'
+    # DOGPILE_CACHE_BINARY = True
+
+
+Easy to Initialize
+``````````````````
+
+.. code:: python
+
+    # app.py
+
+    import config
+    from flask import Flask
+    from flask.ext.dogpile_cache import DogpileCache
+
+
+    app = Flask(__name__)
+    app.config.from_object(config)
+
+    cache = DogpileCache()
+    cache.init_app(app)
+
+    # Alternative way: cache = DogpileCache(app)
+
+
+Easy to Use
+```````````
+
+.. code:: python
+
+    @cache.region('hour')
+    def cached_func(*args):
+        print "First time print", args
+        return args
+
+    value = cached_func()
+
+    # Invalidating
+    cache.invalidate(cached_func, *args)
+
+    # Refreshing
+    cache.refresh(cached_func, *args)
+
+    # Setting custom value
+    cache.set(cached_func, value, *args)
+
+
+Easy to Install
+```````````````
+
+.. code:: bash
+
+    $ pip install Flask-Dogpile-Cache
+
+Links
+`````
+
+* `development version
+  <http://bitbucket.org/ponomar/flask-dogpile-cache>`_
+

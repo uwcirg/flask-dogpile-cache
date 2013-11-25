@@ -3,3 +3,6 @@ syntax: glob
 *~
 
 .idea/
+.pypirc
+Flask_Dogpile_Cache.egg-info/
+dist/

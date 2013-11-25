@@ -1,6 +1,6 @@
 import os
 import re
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -14,17 +14,17 @@ with open(os.path.join(here, 'flask_dogpile_cache.py')) as main_file:
 
 setup(name='Flask-Dogpile-Cache',
       version=VERSION,
-      description="A caching front-end based on the Dogpile lock.",
-      long_description=open(README).read(),
-      keywords='caching',
+      description="Adds dogpile.cache support to your Flask application",
+      long_description=README,
+      keywords='caching flask dogpile',
       author='Vitalii Ponomar',
       author_email='vitalii.ponomar@gmail.com',
       url='http://bitbucket.org/ponomar/flask-dogpile-cache',
       license='BSD',
-      packages=['flask_dogpile_cache'],
-      namespace_packages=['dogpile'],
       zip_safe=False,
       platforms='any',
+      packages=find_packages(),
+      py_modules=['flask_dogpile_cache'],
       install_requires=['Flask',
                         'dogpile.cache>=0.5.2'],
       classifiers=['Development Status :: 4 - Beta',

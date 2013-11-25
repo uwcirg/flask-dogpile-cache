@@ -4,7 +4,7 @@ from functools import wraps
 from types import NoneType
 
 
-__version__ = '0.1'
+__version__ = '0.1.4'
 
 
 class DogpileCache(object):
