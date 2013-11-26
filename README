@@ -1,8 +1,9 @@
 Flask-Dogpile-Cache
 -------------------
 
-Easy to Configure
-`````````````````
+
+Easy to Use
+```````````
 
 .. code:: python
 
@@ -14,16 +15,10 @@ Easy to Configure
         ('day', 3600 * 24),
         ('month', 3600 * 24 * 31),
     )
-
     # Default settings:
     # DOGPILE_CACHE_BACKEND = 'dogpile.cache.memcached'
     # DOGPILE_CACHE_BINARY = True
 
-
-Easy to Initialize
-``````````````````
-
-.. code:: python
 
     # app.py
 
@@ -37,30 +32,19 @@ Easy to Initialize
 
     cache = DogpileCache()
     cache.init_app(app)
-
     # Alternative way: cache = DogpileCache(app)
 
 
-Easy to Use
-```````````
-
-.. code:: python
-
     @cache.region('hour')
     def cached_func(*args):
-        print "First time print", args
+        print "Heavy computation here", args
         return args
 
     value = cached_func()
 
-    # Invalidating
-    cache.invalidate(cached_func, *args)
-
-    # Refreshing
-    cache.refresh(cached_func, *args)
-
-    # Setting custom value
-    cache.set(cached_func, value, *args)
+    cache.invalidate(cached_func, *args)  # Invalidating
+    cache.refresh(cached_func, *args)     # Refreshing
+    cache.set(cached_func, value, *args)  # Setting custom value
 
 
 Easy to Install
@@ -75,4 +59,3 @@ Links
 
 * `development version
   <http://bitbucket.org/ponomar/flask-dogpile-cache>`_
-
