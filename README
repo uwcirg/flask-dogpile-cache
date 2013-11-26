@@ -7,25 +7,23 @@ Easy to Use
 
 .. code:: python
 
-    # config.py
+    # ==================== config.py ====================
 
-    DOGPILE_CACHE_URLS = ("127.0.0.1:11211",)
-    DOGPILE_CACHE_REGIONS = (
+    DOGPILE_CACHE_URLS = ["127.0.0.1:11211"]
+    DOGPILE_CACHE_REGIONS = [
         ('hour', 3600),
         ('day', 3600 * 24),
         ('month', 3600 * 24 * 31),
-    )
+    ]
     # Default settings:
     # DOGPILE_CACHE_BACKEND = 'dogpile.cache.memcached'
-    # DOGPILE_CACHE_BINARY = True
 
 
-    # app.py
+    # ==================== app.py ====================
 
     import config
     from flask import Flask
     from flask.ext.dogpile_cache import DogpileCache
-
 
     app = Flask(__name__)
     app.config.from_object(config)
@@ -34,7 +32,6 @@ Easy to Use
     cache.init_app(app)
     # Alternative way: cache = DogpileCache(app)
 
-
     @cache.region('hour')
     def cached_func(*args):
         print "Heavy computation here", args
@@ -42,9 +39,13 @@ Easy to Use
 
     value = cached_func()
 
-    cache.invalidate(cached_func, *args)  # Invalidating
-    cache.refresh(cached_func, *args)     # Refreshing
-    cache.set(cached_func, value, *args)  # Setting custom value
+    cache.invalidate(cached_func, *args)  # Invalidating cache for cached_func
+    cache.refresh(cached_func, *args)     # Refreshing cache for cached_func
+    cache.set(cached_func, value, *args)  # Setting custom value for cached_func
+    cache.invalidate_region('hour')       # Invalidate cache for all funcs
+                                          # decorated with @cache.region('hour')
+    cache.invalidate_all_regions()        # Invalidate cache for all funcs
+                                          # decorated with @cache.region
 
 
 Easy to Install
