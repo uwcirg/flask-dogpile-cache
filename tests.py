@@ -1,7 +1,6 @@
 from __future__ import with_statement
 
 import sys
-
 from copy import deepcopy
 from flask import Flask
 from flask.ext.dogpile_cache import DogpileCache
@@ -45,10 +44,10 @@ class DogpileCacheTest(unittest.TestCase):
 
         self.func_cached_for_hour = func_cached_for_hour
         self.func_cached_for_day = func_cached_for_day
-        self.func_result_map = ((self.func_cached_for_hour,
-                                 self.func_cached_for_hour_value),
-                                (self.func_cached_for_day,
-                                 self.func_cached_for_day_value))
+        self.func_result_map = (
+            (self.func_cached_for_hour, self.func_cached_for_hour_value),
+            (self.func_cached_for_day, self.func_cached_for_day_value),
+        )
 
     def tearDown(self):
         self.config = None
@@ -133,18 +132,49 @@ class DogpileCacheTest(unittest.TestCase):
 
         self.assertRaises(KeyError, func)
 
+    def test_cache_with_multiple_arguments(self):
+        @self.cache.region('hour')
+        def func(a, b):
+            return a, b
+
+        values = [
+            (1, 2),
+            ('ololo', 35),
+            (123, [1, 2, 3]),
+        ]
+        for a, b in values:
+            self.assertEqual(func(a, b), (a, b))
+
+    def test_cache_with_long_keys(self):
+        @self.cache.region('hour')
+        def func(a, b):
+            return a, b
+
+        values = [
+            ('k e y' * 1000, 'another key' * 1000),
+            ('ololo' * 1000, 'Ukraine, Kyiv' * 1000),
+        ]
+        for a, b in values:
+            self.assertEqual(func(a, b), (a, b))
+
     def test_not_cached_func(self):
         not_cached_func = lambda: None
-        self.assertRaises(AttributeError,
-                          self.cache.invalidate,
-                          not_cached_func)
-        self.assertRaises(AttributeError,
-                          self.cache.refresh,
-                          not_cached_func)
-        self.assertRaises(AttributeError,
-                          self.cache.set,
-                          not_cached_func,
-                          'some_value')
+        self.assertRaises(
+            AttributeError,
+            self.cache.invalidate,
+            not_cached_func,
+        )
+        self.assertRaises(
+            AttributeError,
+            self.cache.refresh,
+            not_cached_func,
+        )
+        self.assertRaises(
+            AttributeError,
+            self.cache.set,
+            not_cached_func,
+            'some_value',
+        )
 
     def test_wrong_config(self):
         app = Flask(__name__)

@@ -1,9 +1,10 @@
 from dogpile.cache import make_region
 from functools import wraps
+from hashlib import md5
 from types import NoneType
 
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 
 class NotInitialized(object):
@@ -107,10 +108,12 @@ class DogpileCache(object):
         wrappers_debug = wrappers_debug or self._wrappers_debug
         wrappers_production = wrappers_production or self._wrappers_production
 
-        self._set_cache_regions(app=app,
-                                config=config,
-                                wrappers_debug=wrappers_debug,
-                                wrappers_production=wrappers_production)
+        self._set_cache_regions(
+            app=app,
+            config=config,
+            wrappers_debug=wrappers_debug,
+            wrappers_production=wrappers_production,
+        )
 
     def _set_cache_regions(self, app, config, wrappers_debug,
                            wrappers_production):
@@ -119,9 +122,10 @@ class DogpileCache(object):
 
         for region_tuple in config['DOGPILE_CACHE_REGIONS']:
             if len(region_tuple) < 2:
-                raise ValueError('`DOGPILE_CACHE_REGIONS` tuple item length '
-                                 'must be at least 2: region_name and '
-                                 'region_timeout')
+                raise ValueError(
+                    '`DOGPILE_CACHE_REGIONS` tuple item length '
+                    'must be at least 2: region_name and region_timeout'
+                )
 
             region_name = region_tuple[0]
             region_timeout = region_tuple[1]
@@ -131,9 +135,10 @@ class DogpileCache(object):
             elif config['DOGPILE_CACHE_BACKEND']:
                 region_backend = config['DOGPILE_CACHE_BACKEND']
             else:
-                raise ValueError('`DOGPILE_CACHE_BACKEND` must be specified '
-                                 'or not initialized at all '
-                                 '(for default value)')
+                raise ValueError(
+                    '`DOGPILE_CACHE_BACKEND` must be specified '
+                    'or not initialized at all (for default value)'
+                )
 
             if len(region_tuple) > 3:
                 region_urls = region_tuple[3]
@@ -152,7 +157,13 @@ class DogpileCache(object):
             arguments = dict(url=region_urls)
             arguments.update(region_arguments)
 
-            region = make_region().configure(
+            def key_mangler(key):
+                if ':' in key:
+                    func, args = key.split(':', 1)
+                    key = '%s:%s' % (func, md5(args).hexdigest())
+                return key
+
+            region = make_region(key_mangler=key_mangler).configure(
                 backend=region_backend,
                 expiration_time=region_timeout,
                 arguments=arguments,
@@ -180,6 +191,7 @@ class DogpileCache(object):
         """
         if isinstance(self._cache_regions, NotInitialized):
             raise RuntimeError('working outside of application context')
+
         return self._cache_regions[region_name]
 
     def get_all_regions(self):
@@ -192,6 +204,7 @@ class DogpileCache(object):
         """
         if isinstance(self._cache_regions, NotInitialized):
             raise RuntimeError('working outside of application context')
+
         return self._cache_regions
 
     def get_region_decorator(self, region_name):
@@ -206,6 +219,7 @@ class DogpileCache(object):
         """
         if isinstance(self._cache_regions_decorators, NotInitialized):
             raise RuntimeError('working outside of application context')
+
         return self._cache_regions_decorators[region_name]
 
     def region(self, name):
@@ -232,7 +246,9 @@ class DogpileCache(object):
                     return cache_decorator(func)(*args)
                 else:
                     raise KeyError("You didn't specified region `%s`" % name)
+
             return wrapper
+
         return decorator
 
     def invalidate_region(self, region_name, hard=True):
@@ -288,6 +304,7 @@ class DogpileCache(object):
         region_name = getattr(func, self.FUNC_REGION_NAME_ATTR)
         decorator = self.get_region_decorator(region_name)
         func = decorator(func)
+
         return func.invalidate(*args)
 
     def refresh(self, func, *args):
@@ -310,6 +327,7 @@ class DogpileCache(object):
         region_name = getattr(func, self.FUNC_REGION_NAME_ATTR)
         decorator = self.get_region_decorator(region_name)
         func = decorator(func)
+
         return func.refresh(*args)
 
     def set(self, func, value, *args):
@@ -330,4 +348,5 @@ class DogpileCache(object):
         region_name = getattr(func, self.FUNC_REGION_NAME_ATTR)
         decorator = self.get_region_decorator(region_name)
         func = decorator(func)
+
         return func.set(value, *args)
