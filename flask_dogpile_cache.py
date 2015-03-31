@@ -4,7 +4,7 @@ from hashlib import md5
 from types import NoneType
 
 
-__version__ = '0.3'
+__version__ = '0.3.1'
 
 
 class NotInitialized(object):
@@ -158,10 +158,8 @@ class DogpileCache(object):
             arguments.update(region_arguments)
 
             def key_mangler(key):
-                if ':' in key:
-                    func, args = key.split(':', 1)
-                    key = '%s:%s' % (func, md5(args).hexdigest())
-                return key
+                func, args = key.split('|', 1)
+                return '%s|%s' % (func, md5(args).hexdigest())
 
             region = make_region(key_mangler=key_mangler).configure(
                 backend=region_backend,
