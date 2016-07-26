@@ -1,7 +1,6 @@
 from dogpile.cache import make_region
 from functools import wraps
 from hashlib import md5
-from types import NoneType
 
 
 __version__ = '0.3.1'
@@ -86,7 +85,7 @@ class DogpileCache(object):
 
     def init_app(self, app, config=None, wrappers_debug=None,
                  wrappers_production=None):
-        if not isinstance(config, (NoneType, dict)):
+        if not isinstance(config, (type(None), dict)):
             raise ValueError("`config` must be dict or NoneType")
 
         if config is None:
