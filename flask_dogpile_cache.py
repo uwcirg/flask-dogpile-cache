@@ -158,7 +158,7 @@ class DogpileCache(object):
 
             def key_mangler(key):
                 func, args = key.split('|', 1)
-                return '%s|%s' % (func, md5(args).hexdigest())
+                return '%s|%s' % (func, md5(args.encode('utf-8')).hexdigest())
 
             region = make_region(key_mangler=key_mangler).configure(
                 backend=region_backend,
